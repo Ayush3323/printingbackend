@@ -1,0 +1,529 @@
+{
+    "info": {
+        "_postman_id": "vistaprint-clone-id",
+        "name": "Vistaprint Clone API (Structured)",
+        "description": "Structured Collection for Vistaprint Clone Backend.\n\n**Organization**:\n- Modules (A-D)\n  - GET Operations (Read)\n  - POST Operations (Create/Action)\n\n**Auth**: Basic Auth (testuser/password123).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api/v1",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "basic",
+        "basic": [
+            {
+                "key": "password",
+                "value": "password123",
+                "type": "string"
+            },
+            {
+                "key": "username",
+                "value": "testuser",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Module A: Users",
+            "item": [
+                {
+                    "name": "POST Operations",
+                    "item": [
+                        {
+                            "name": "Register User",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"testuser_2\",\n    \"password\": \"password123\",\n    \"email\": \"test2@example.com\",\n    \"company_name\": \"My StartUp\",\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/users/register/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "users",
+                                        "register",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Add Address",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"type\": \"shipping\",\n    \"recipient_name\": \"Jane Doe\",\n    \"street\": \"456 Innovation Dr\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zip_code\": \"94103\",\n    \"country\": \"USA\",\n    \"phone_number\": \"555-0999\",\n    \"is_default\": true\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/addresses/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "addresses",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET Operations",
+                    "item": [
+                        {
+                            "name": "Get My Profile",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/users/me/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "users",
+                                        "me",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List My Addresses",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/addresses/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "addresses",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Module B: Catalog (Public)",
+            "item": [
+                {
+                    "name": "POST Operations",
+                    "item": [
+                        {
+                            "name": "Create Category (Root)",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"name\": \"Marketing Materials\",\n    \"slug\": \"marketing-materials\",\n    \"description\": \"Main category\",\n    \"display_order\": 1\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/categories/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "categories",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Subcategory",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"category\": 1,\n    \"name\": \"Business Cards\",\n    \"slug\": \"business-cards\",\n    \"description\": \"All types of business cards\",\n    \"display_order\": 1\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/subcategories/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "subcategories",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Product",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"subcategory\": 1,\n    \"name\": \"Premium Business Card\",\n    \"slug\": \"premium-business-card\",\n    \"sku\": \"BC-PREM-001\",\n    \"description\": \"High quality card\",\n    \"base_price\": \"15.00\",\n    \"stock_quantity\": 1000,\n    \"meta_title\": \"Buy Premium Cards\",\n    \"meta_description\": \"Best cards in town\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/products/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET Operations",
+                    "item": [
+                        {
+                            "name": "List All Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/products/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Categories",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/categories/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "categories",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Filter Products by Category",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/products/?category=business-cards",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "category",
+                                            "value": "business-cards"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Module C: Designs",
+            "item": [
+                {
+                    "name": "POST Operations",
+                    "item": [
+                        {
+                            "name": "Create Template",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"name\": \"Modern Business Card Template\",\n    \"product\": 1,\n    \"subcategory\": 1,\n    \"design_json\": {\"version\": \"1.0\", \"canvas\": \"...\"},\n    \"tags\": [\"business\", \"custom\"]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/templates/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "templates",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create New Design",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"product\": 1,\n    \"name\": \"Summer Campaign Flyer\",\n    \"design_json\": {\"version\": \"1.0\", \"canvas\": \"...\"},\n    \"tags\": [\"summer\", \"promo\"]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/my-designs/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "my-designs",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Upload Asset (Image)",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "type",
+                                            "value": "logo",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": []
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/assets/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "assets",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET Operations",
+                    "item": [
+                        {
+                            "name": "List My Designs",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/my-designs/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "my-designs",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Templates (Public)",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/templates/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "templates",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Fonts (Public)",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/fonts/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "fonts",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Module D: Orders",
+            "item": [
+                {
+                    "name": "POST Operations",
+                    "item": [
+                        {
+                            "name": "Create Order (Checkout)",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"shipping_address\": 1,\n    \"items\": [\n        {\n            \"product\": 1,\n            \"quantity\": 1000,\n            \"design\": 1\n        }\n    ]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/orders/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "orders",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET Operations",
+                    "item": [
+                        {
+                            "name": "List My Orders",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/orders/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "orders",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Order Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/orders/1/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "orders",
+                                        "1",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

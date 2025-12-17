@@ -1,0 +1,8 @@
+django>=5.0
+djangorestframework
+psycopg2-binary
+django-cors-headers
+celery
+redis
+playwright
+Pillow
