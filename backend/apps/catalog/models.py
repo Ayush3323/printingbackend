@@ -39,7 +39,23 @@ class Product(models.Model):
     sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit")
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=500, blank=True)
+    
+    # Pricing
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Discounts
+    DISCOUNT_TYPE_CHOICES = (
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Amount'),
+    )
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPE_CHOICES, blank=True, null=True)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Percentage or fixed amount")
+    discount_start_date = models.DateTimeField(null=True, blank=True)
+    discount_end_date = models.DateTimeField(null=True, blank=True)
+    is_on_sale = models.BooleanField(default=False)
+    
+    # Media (S3 URLs)
+    primary_image = models.URLField(max_length=500, blank=True, null=True, help_text="S3 URL for primary image")
     
     # Inventory & Logistics
     stock_quantity = models.IntegerField(default=0, help_text="Available stock")
@@ -55,6 +71,28 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def final_price(self):
+        """Calculate final price after discount"""
+        if not self.is_on_sale or not self.discount_value:
+            return self.base_price
+        
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Check if discount is active
+        if self.discount_start_date and now < self.discount_start_date:
+            return self.base_price
+        if self.discount_end_date and now > self.discount_end_date:
+            return self.base_price
+        
+        # Apply discount
+        if self.discount_type == 'percentage':
+            discount_amount = self.base_price * (self.discount_value / 100)
+            return max(self.base_price - discount_amount, 0)
+        else:  # fixed
+            return max(self.base_price - self.discount_value, 0)
 
     def __str__(self):
         return self.name
@@ -110,3 +148,42 @@ class AttributeValue(models.Model):
 
     def __str__(self):
         return f"{self.attribute.name}: {self.value}"
+
+class ProductImage(models.Model):
+    """
+    Multiple images for a product (gallery) - S3 URLs
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.URLField(max_length=500, help_text="S3 URL for product image")
+    alt_text = models.CharField(max_length=200, blank=True)
+    display_order = models.IntegerField(default=0)
+    is_primary = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['display_order', 'created_at']
+
+    def __str__(self):
+        return f"{self.product.name} - Image {self.display_order}"
+
+class ProductReview(models.Model):
+    """
+    Customer reviews for products
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='product_reviews')
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)], help_text="1-5 stars")
+    title = models.CharField(max_length=200, blank=True)
+    comment = models.TextField()
+    is_verified_purchase = models.BooleanField(default=False)
+    helpful_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('product', 'user')  # One review per user per product
+
+    def __str__(self):
+        return f"{self.user.email} - {self.product.name} ({self.rating}★)"
+

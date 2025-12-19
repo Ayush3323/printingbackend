@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminUserAPI } from '../services/api';
+import { useDataCache } from '../contexts/DataCacheContext';
 import CreateUserModal from '../components/CreateUserModal';
 import './Customers.css';
 
@@ -10,16 +11,22 @@ const Customers = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const { fetchUsers, invalidateCache } = useDataCache();
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsersData();
     }, []);
 
-    const fetchUsers = async () => {
+    const fetchUsersData = async (forceRefresh = false) => {
         try {
             setLoading(true);
-            const response = await adminUserAPI.getUsers({ search: searchTerm });
-            setUsers(response.data);
+            const { data, fromCache } = await fetchUsers({ search: searchTerm }, forceRefresh);
+            setUsers(data);
+
+            // Show indicator if data is from cache
+            if (fromCache && !forceRefresh) {
+                console.log('📦 Loaded from cache');
+            }
         } catch (error) {
             console.error('Error fetching users:', error);
             if (error.response?.status === 401) {
@@ -32,7 +39,12 @@ const Customers = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        fetchUsers();
+        fetchUsersData(true); // Force refresh on search
+    };
+
+    const handleRefresh = () => {
+        invalidateCache(['users']);
+        fetchUsersData(true);
     };
 
     const handleToggleActive = async (user) => {
@@ -42,7 +54,8 @@ const Customers = () => {
             } else {
                 await adminUserAPI.activateUser(user.id);
             }
-            fetchUsers();
+            invalidateCache(['users']);
+            fetchUsersData(true);
         } catch (error) {
             console.error('Error toggling user status:', error);
             alert('Failed to update user status');
@@ -53,7 +66,8 @@ const Customers = () => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
                 await adminUserAPI.deleteUser(userId);
-                fetchUsers();
+                invalidateCache(['users']);
+                fetchUsersData(true);
             } catch (error) {
                 console.error('Error deleting user:', error);
                 alert('Failed to delete user');
@@ -84,6 +98,9 @@ const Customers = () => {
                         />
                         <button type="submit">Search</button>
                     </form>
+                    <button onClick={handleRefresh} className="btn-refresh" title="Refresh Data">
+                        🔄 Refresh
+                    </button>
                     <button onClick={() => setShowCreateModal(true)} className="btn-primary">
                         + Create User
                     </button>
@@ -194,7 +211,10 @@ const Customers = () => {
             <CreateUserModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
-                onUserCreated={fetchUsers}
+                onUserCreated={() => {
+                    invalidateCache(['users']);
+                    fetchUsersData(true);
+                }}
             />
         </div>
     );

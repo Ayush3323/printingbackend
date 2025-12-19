@@ -51,8 +51,43 @@ export const adminCatalogAPI = {
     getProducts: (params) => api.get('/admin/products/', { params }),
     getProduct: (id) => api.get(`/admin/products/${id}/`),
     createProduct: (data) => api.post('/admin/products/', data),
-    updateProduct: (id, data) => api.patch(`/admin/products/${id}/`, data),
+    updateProduct: (id, data) => api.put(`/admin/products/${id}/`, data),
     deleteProduct: (id) => api.delete(`/admin/products/${id}/`),
+
+    // Product Attributes
+    getAttributes: (params) => api.get('/admin/attributes/', { params }),
+    getAttribute: (id) => api.get(`/admin/attributes/${id}/`),
+    createAttribute: (data) => api.post('/admin/attributes/', data),
+    updateAttribute: (id, data) => api.put(`/admin/attributes/${id}/`, data),
+    deleteAttribute: (id) => api.delete(`/admin/attributes/${id}/`),
+
+    // Attribute Values
+    getAttributeValues: (params) => api.get('/admin/attribute-values/', { params }),
+    createAttributeValue: (data) => api.post('/admin/attribute-values/', data),
+    updateAttributeValue: (id, data) => api.put(`/admin/attribute-values/${id}/`, data),
+    deleteAttributeValue: (id) => api.delete(`/admin/attribute-values/${id}/`),
+
+    // Print Specs
+    getPrintSpecs: (params) => api.get('/admin/print-specs/', { params }),
+    getPrintSpec: (id) => api.get(`/admin/print-specs/${id}/`),
+    createPrintSpec: (data) => api.post('/admin/print-specs/', data),
+    updatePrintSpec: (id, data) => api.put(`/admin/print-specs/${id}/`, data),
+    deletePrintSpec: (id) => api.delete(`/admin/print-specs/${id}/`),
+
+    // Product Images
+    getProductImages: (params) => api.get('/admin/product-images/', { params }),
+    createProductImage: (data) => api.post('/admin/product-images/', data),
+    updateProductImage: (id, data) => api.put(`/admin/product-images/${id}/`, data),
+    deleteProductImage: (id) => api.delete(`/admin/product-images/${id}/`),
+
+    // Product Reviews
+    getProductReviews: (params) => api.get('/admin/product-reviews/', { params }),
+    getProductReview: (id) => api.get(`/admin/product-reviews/${id}/`),
+    createProductReview: (data) => api.post('/admin/product-reviews/', data),
+    updateProductReview: (id, data) => api.put(`/admin/product-reviews/${id}/`, data),
+    deleteProductReview: (id) => api.delete(`/admin/product-reviews/${id}/`),
+    markReviewHelpful: (id) => api.post(`/admin/product-reviews/${id}/mark_helpful/`),
+
     bulkUpdateStock: (updates) => api.post('/admin/products/bulk_update_stock/', { updates }),
     getProductStats: () => api.get('/admin/products/stats/'),
 };

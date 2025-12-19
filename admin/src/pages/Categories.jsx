@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminCatalogAPI } from '../services/api';
+import { useDataCache } from '../contexts/DataCacheContext';
 import './Categories.css';
 
 const Categories = () => {
@@ -11,6 +12,7 @@ const Categories = () => {
     const [editingCategory, setEditingCategory] = useState(null);
     const [editingSubcategory, setEditingSubcategory] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const { fetchCategories, fetchSubcategories, invalidateCache } = useDataCache();
 
     const [categoryForm, setCategoryForm] = useState({
         name: '',
@@ -31,18 +33,17 @@ const Categories = () => {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (forceRefresh = false) => {
         try {
             setLoading(true);
-            const [catResponse, subResponse] = await Promise.all([
-                adminCatalogAPI.getCategories(),
-                adminCatalogAPI.getSubcategories(),
+            const [catResult, subResult] = await Promise.all([
+                fetchCategories({}, forceRefresh),
+                fetchSubcategories({}, forceRefresh),
             ]);
-            setCategories(catResponse.data);
-            setSubcategories(subResponse.data);
+            setCategories(catResult.data);
+            setSubcategories(subResult.data);
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert('Failed to fetch categories');
         } finally {
             setLoading(false);
         }
@@ -91,7 +92,8 @@ const Categories = () => {
                 alert('Category created successfully');
             }
             setShowCategoryModal(false);
-            fetchData();
+            invalidateCache(['categories']);
+            fetchData(true);
         } catch (error) {
             console.error('Error saving category:', error);
             alert('Failed to save category');
@@ -109,7 +111,8 @@ const Categories = () => {
                 alert('Subcategory created successfully');
             }
             setShowSubcategoryModal(false);
-            fetchData();
+            invalidateCache(['subcategories']);
+            fetchData(true);
         } catch (error) {
             console.error('Error saving subcategory:', error);
             alert('Failed to save subcategory');
@@ -121,7 +124,8 @@ const Categories = () => {
             try {
                 await adminCatalogAPI.deleteCategory(categoryId);
                 alert('Category deleted successfully');
-                fetchData();
+                invalidateCache(['categories', 'subcategories']);
+                fetchData(true);
             } catch (error) {
                 console.error('Error deleting category:', error);
                 alert('Failed to delete category');
@@ -134,7 +138,8 @@ const Categories = () => {
             try {
                 await adminCatalogAPI.deleteSubcategory(subcategoryId);
                 alert('Subcategory deleted successfully');
-                fetchData();
+                invalidateCache(['subcategories']);
+                fetchData(true);
             } catch (error) {
                 console.error('Error deleting subcategory:', error);
                 alert('Failed to delete subcategory');
@@ -150,9 +155,14 @@ const Categories = () => {
         <div className="categories-page">
             <div className="page-header">
                 <h1>Category Management</h1>
-                <button onClick={() => openCategoryModal()} className="btn-primary">
-                    + Add Category
-                </button>
+                <div className="header-actions">
+                    <button onClick={() => fetchData(true)} className="btn-refresh" title="Refresh Data">
+                        🔄 Refresh
+                    </button>
+                    <button onClick={() => openCategoryModal()} className="btn-primary">
+                        + Add Category
+                    </button>
+                </div>
             </div>
 
             <div className="categories-tree">
