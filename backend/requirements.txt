@@ -6,3 +6,6 @@ celery
 redis
 playwright
 Pillow
+gunicorn
+dj-database-url
+python-dotenv
