@@ -1,6 +1,8 @@
 from rest_framework import viewsets, permissions, filters
-from .models import Category, Subcategory, Product
-from .serializers import CategorySerializer, SubcategorySerializer, ProductSerializer
+from django.db import models
+from .models import Category, Subcategory, Product, Banner
+from .serializers import CategorySerializer, SubcategorySerializer, ProductSerializer, BannerSerializer
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -58,3 +60,31 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(subcategory__category__slug=category_slug)
             
         return queryset
+
+class BannerViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Banners (Hero sections, promotions)
+    Read-only for frontend consumption
+    """
+    serializer_class = BannerSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        from django.utils import timezone
+        now = timezone.now()
+        
+        queryset = Banner.objects.filter(is_active=True)
+        
+        # Filter by date range
+        queryset = queryset.filter(
+            models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
+        ).filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
+        )
+        
+        # Filter by placement if provided
+        placement = self.request.query_params.get('placement', None)
+        if placement:
+            queryset = queryset.filter(placement=placement)
+        
+        return queryset.order_by('display_order', '-created_at')

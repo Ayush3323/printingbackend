@@ -187,3 +187,39 @@ class ProductReview(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.product.name} ({self.rating}★)"
 
+class Banner(models.Model):
+    """
+    Hero banners and promotional sections for homepage
+    """
+    PLACEMENT_CHOICES = (
+        ('hero_primary', 'Hero Primary Section'),
+        ('hero_secondary', 'Hero Secondary Section'),
+        ('homepage', 'Homepage General'),
+        ('category', 'Category Page'),
+    )
+    
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=200, blank=True)
+    image = models.URLField(max_length=500, help_text="S3 URL for banner image")
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES, default='homepage')
+    
+    # Buttons stored as JSON: [{"label": "Shop Now", "link": "/products", "primary": true}]
+    buttons_json = models.JSONField(default=list, blank=True, help_text="JSON array of button objects")
+    footer_text = models.CharField(max_length=300, blank=True, help_text="Optional footer text with breadcrumb")
+    
+    # Display settings
+    is_active = models.BooleanField(default=True)
+    display_order = models.IntegerField(default=0)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    
+    # Audit
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['placement', 'display_order', '-created_at']
+    
+    def __str__(self):
+        return f"{self.get_placement_display()} - {self.title}"
+

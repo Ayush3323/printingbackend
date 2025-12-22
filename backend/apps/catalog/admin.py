@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, Subcategory, Product, ProductImage, ProductReview, ProductAttribute, AttributeValue, PrintSpecs
+from .models import Category, Subcategory, Product, ProductImage, ProductReview, ProductAttribute, AttributeValue, PrintSpecs, Banner
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -37,3 +38,10 @@ class ProductImageAdmin(admin.ModelAdmin):
 admin.site.register(ProductAttribute)
 admin.site.register(AttributeValue)
 admin.site.register(PrintSpecs)
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'placement', 'is_active', 'display_order', 'start_date', 'end_date')
+    list_filter = ('placement', 'is_active')
+    search_fields = ('title', 'subtitle')
+    ordering = ('placement', 'display_order', '-created_at')

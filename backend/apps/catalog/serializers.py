@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import Category, Subcategory, Product, PrintSpecs, ProductAttribute, AttributeValue, ProductImage, ProductReview
+from .models import Category, Subcategory, Product, PrintSpecs, ProductAttribute, AttributeValue, ProductImage, ProductReview, Banner
+
+
+
+class ProductMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'slug', 'primary_image', 'is_featured']
 
 class SubcategorySerializer(serializers.ModelSerializer):
+    products = ProductMinimalSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Subcategory
-        fields = ['id', 'name', 'slug', 'description', 'image', 'category']
+        fields = ['id', 'name', 'slug', 'description', 'image', 'category', 'products']
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = SubcategorySerializer(many=True, read_only=True)
@@ -111,4 +120,17 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.primary_image = validated_data.get('primary_image', instance.primary_image)
         instance.save()
         return instance
+
+class BannerSerializer(serializers.ModelSerializer):
+    buttons = serializers.SerializerMethodField()
+    footer = serializers.CharField(source='footer_text', read_only=True)
+    
+    class Meta:
+        model = Banner
+        fields = ['id', 'title', 'subtitle', 'image', 'placement', 'buttons', 'footer', 
+                  'is_active', 'display_order', 'start_date', 'end_date']
+    
+    def get_buttons(self, obj):
+        """Transform buttons_json to match frontend format"""
+        return obj.buttons_json if obj.buttons_json else []
 

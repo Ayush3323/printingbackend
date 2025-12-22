@@ -1,11 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
-from .views import CategoryViewSet, SubcategoryViewSet, ProductViewSet
+from .views import CategoryViewSet, SubcategoryViewSet, ProductViewSet, BannerViewSet
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'products', ProductViewSet, basename='product')
+router.register(r'banners', BannerViewSet, basename='banner')
+
 
 # Nested routes
 category_router = routers.NestedSimpleRouter(router, r'categories', lookup='category')
