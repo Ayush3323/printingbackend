@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { adminCatalogAPI } from '../services/api';
 import { useDataCache } from '../contexts/DataCacheContext';
 import ProductAttributesTab from '../components/ProductAttributesTab';
-import PrintSpecsTab from '../components/PrintSpecsTab';
+import ZakekeTab from '../components/ZakekeTab';
 import './Products.css';
 import '../components/ProductAttributes.css';
 
@@ -14,7 +14,7 @@ const Products = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('basic'); // basic, attributes, printspecs
+    const [activeTab, setActiveTab] = useState('basic'); // basic, attributes, zakeke
     const { fetchProducts, fetchCategories, fetchSubcategories, invalidateCache } = useDataCache();
 
     const [formData, setFormData] = useState({
@@ -29,7 +29,9 @@ const Products = () => {
         discount_type: '',
         discount_value: 0,
         is_on_sale: false,
+        is_on_sale: false,
         primary_image: null,
+        zakeke_product_id: '',
     });
 
     useEffect(() => {
@@ -106,6 +108,7 @@ const Products = () => {
             discount_value: 0,
             is_on_sale: false,
             primary_image: null,
+            zakeke_product_id: '',
         });
         setShowModal(true);
     };
@@ -126,6 +129,7 @@ const Products = () => {
             discount_value: product.discount_value || 0,
             is_on_sale: product.is_on_sale || false,
             primary_image: product.primary_image || null,
+            zakeke_product_id: product.zakeke_product_id || '',
         });
         setShowModal(true);
     };
@@ -250,17 +254,17 @@ const Products = () => {
                                     <td><code>{product.sku || 'N/A'}</code></td>
                                     <td>{product.subcategory_name || 'Not Available'}</td>
                                     <td>
-                                        {product.is_on_sale && product.final_price < product.base_price ? (
+                                        {product.is_on_sale && Number(product.final_price) < Number(product.base_price) ? (
                                             <div>
                                                 <span style={{ textDecoration: 'line-through', color: '#6b7280', fontSize: '13px' }}>
-                                                    ₹{product.base_price || '0.00'}
+                                                    ₹{Number(product.base_price).toFixed(2) || '0.00'}
                                                 </span>
                                                 <div style={{ color: '#dc2626', fontWeight: '600' }}>
-                                                    ₹{product.final_price ? product.final_price.toFixed(2) : '0.00'}
+                                                    ₹{product.final_price ? Number(product.final_price).toFixed(2) : '0.00'}
                                                 </div>
                                             </div>
                                         ) : (
-                                            `₹${product.base_price || '0.00'}`
+                                            `₹${product.base_price ? Number(product.base_price).toFixed(2) : '0.00'}`
                                         )}
                                     </td>
                                     <td>{product.stock_quantity ?? 'N/A'}</td>
@@ -312,10 +316,10 @@ const Products = () => {
                                     Attributes
                                 </button>
                                 <button
-                                    className={`tab-button ${activeTab === 'printspecs' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('printspecs')}
+                                    className={`tab-button ${activeTab === 'zakeke' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('zakeke')}
                                 >
-                                    Print Specs
+                                    Zakeke Integration
                                 </button>
                             </div>
                         )}
@@ -504,12 +508,15 @@ const Products = () => {
                             />
                         )}
 
-                        {/* Print Specs Tab */}
-                        {activeTab === 'printspecs' && editingProduct && (
-                            <PrintSpecsTab
-                                productId={editingProduct.id}
+                        {/* Zakeke Tab */}
+                        {activeTab === 'zakeke' && (
+                            <ZakekeTab
+                                formData={formData}
+                                handleInputChange={handleInputChange}
                             />
                         )}
+
+
                     </div>
                 </div>
             )}

@@ -67,12 +67,7 @@ export const adminCatalogAPI = {
     updateAttributeValue: (id, data) => api.put(`/admin/attribute-values/${id}/`, data),
     deleteAttributeValue: (id) => api.delete(`/admin/attribute-values/${id}/`),
 
-    // Print Specs
-    getPrintSpecs: (params) => api.get('/admin/print-specs/', { params }),
-    getPrintSpec: (id) => api.get(`/admin/print-specs/${id}/`),
-    createPrintSpec: (data) => api.post('/admin/print-specs/', data),
-    updatePrintSpec: (id, data) => api.put(`/admin/print-specs/${id}/`, data),
-    deletePrintSpec: (id) => api.delete(`/admin/print-specs/${id}/`),
+
 
     // Product Images
     getProductImages: (params) => api.get('/admin/product-images/', { params }),
