@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Subcategory, Product, ProductImage, ProductReview, ProductAttribute, AttributeValue, PrintSpecs, Banner
+from .models import Category, Subcategory, Product, ProductImage, ProductReview, Banner
 
 
 @admin.register(Category)
@@ -35,9 +35,7 @@ class ProductReviewAdmin(admin.ModelAdmin):
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image', 'display_order', 'is_primary')
 
-admin.site.register(ProductAttribute)
-admin.site.register(AttributeValue)
-admin.site.register(PrintSpecs)
+
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):

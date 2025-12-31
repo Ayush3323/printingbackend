@@ -11,9 +11,9 @@ Thumbs.db
 # =========================
 # Environment variables
 # =========================
-.env
-.env.*
-!.env.example
+# .env
+# .env.*
+# !.env.example
 
 # =========================
 # Logs
@@ -32,9 +32,9 @@ dist/
 build/
 
 # Virtual environments (DO NOT COMMIT THESE)
-venv/
-env/
-.venv/
+# venv/
+# env/
+# .venv/
 
 # Django static & media (depends on your setup)
 staticfiles/

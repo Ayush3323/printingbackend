@@ -34,7 +34,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Products.
     """
-    queryset = Product.objects.filter(is_active=True).prefetch_related('attributes__values', 'print_specs')
+    queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]

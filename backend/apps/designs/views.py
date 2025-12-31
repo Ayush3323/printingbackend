@@ -38,7 +38,7 @@ class AssetViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 class TemplateViewSet(viewsets.ModelViewSet):
-    queryset = Template.objects.filter(is_active=True)
+    queryset = Template.objects.filter(is_active=True).prefetch_related('elements')
     serializer_class = TemplateSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]

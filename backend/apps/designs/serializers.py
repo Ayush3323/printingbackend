@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import SavedDesign, Asset, Template, Font
+
+from .models import SavedDesign, Asset, Template, Font, TemplateElement
 
 class AssetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,11 +22,27 @@ class SavedDesignSerializer(serializers.ModelSerializer):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
 
+class TemplateElementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemplateElement
+        fields = [
+            'id', 'type', 'default_text', 'default_image', 
+            'x_percent', 'y_percent', 'max_width_percent', 'rotation',
+            'font_family', 'font_size', 'color', 'locked', 'display_order'
+        ]
+
 class TemplateSerializer(serializers.ModelSerializer):
     subcategory_name = serializers.ReadOnlyField(source='subcategory.name')
+    elements = TemplateElementSerializer(many=True, read_only=True)
+    elements = TemplateElementSerializer(many=True, read_only=True)
+
     class Meta:
         model = Template
-        fields = ['id', 'product', 'name', 'description', 'design_json', 'subcategory', 'subcategory_name', 'tags', 'preview_image']
+        fields = [
+            'id', 'product', 'name', 'description', 
+            'surface', 'design_json', 'subcategory', 'subcategory_name', 
+            'tags', 'preview_image', 'locked', 'is_active', 'elements'
+        ]
 
 class FontSerializer(serializers.ModelSerializer):
     class Meta:

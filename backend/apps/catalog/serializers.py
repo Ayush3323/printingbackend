@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Category, Subcategory, Product, PrintSpecs, ProductAttribute, AttributeValue, ProductImage, ProductReview, Banner
+from .models import Category, Subcategory, Product, ProductImage, ProductReview, Banner
+from apps.zakeke.models import ZakekeProduct
 
 
 
@@ -22,22 +23,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'slug', 'description', 'image', 'subcategories']
 
-class AttributeValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttributeValue
-        fields = ['id', 'value', 'display_value', 'price_adjustment', 'is_default', 'swatch_color', 'swatch_image']
 
-class ProductAttributeSerializer(serializers.ModelSerializer):
-    values = AttributeValueSerializer(many=True, required=False)
-
-    class Meta:
-        model = ProductAttribute
-        fields = ['id', 'name', 'display_name', 'attribute_type', 'is_required', 'values']
-
-class PrintSpecsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PrintSpecs
-        fields = ['width_mm', 'height_mm', 'bleed_margin_mm', 'safe_zone_mm', 'format_template_url', 'allowed_file_types']
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,13 +47,12 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     subcategory_name = serializers.ReadOnlyField(source='subcategory.name')
-    attributes = ProductAttributeSerializer(many=True, required=False)
-    print_specs = PrintSpecsSerializer(required=False)
     images = ProductImageSerializer(many=True, read_only=True)
     reviews = ProductReviewSerializer(many=True, read_only=True)
     final_price = serializers.ReadOnlyField()
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    zakeke_product_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, write_only=True)
 
     class Meta:
         model = Product
@@ -76,7 +61,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'description', 'base_price', 'stock_quantity', 
             'discount_type', 'discount_value', 'discount_start_date', 'discount_end_date', 'is_on_sale',
             'final_price', 'primary_image', 'images',
-            'attributes', 'print_specs', 'reviews', 'average_rating', 'review_count',
+            'reviews', 'average_rating', 'review_count',
+            'zakeke_product_id',
             'meta_title', 'meta_description', 'is_active', 'is_featured'
         ]
     
@@ -90,36 +76,48 @@ class ProductSerializer(serializers.ModelSerializer):
         return obj.reviews.count()
 
     def create(self, validated_data):
-        attributes_data = validated_data.pop('attributes', [])
-        print_specs_data = validated_data.pop('print_specs', None)
-        
+        zakeke_id = validated_data.pop('zakeke_product_id', None)
         product = Product.objects.create(**validated_data)
-        
-        if print_specs_data:
-            PrintSpecs.objects.create(product=product, **print_specs_data)
-            
-        for attr_data in attributes_data:
-            values_data = attr_data.pop('values', [])
-            attribute = ProductAttribute.objects.create(product=product, **attr_data)
-            
-            for val_data in values_data:
-                AttributeValue.objects.create(attribute=attribute, **val_data)
-                
+        if zakeke_id:
+            ZakekeProduct.objects.create(product=product, zakeke_product_id=zakeke_id)
         return product
 
     def update(self, instance, validated_data):
-        # NOTE: Updating nested arrays is complex (match IDs? delete missing?). 
-        # For simplicity in this 'future-proofing' request, we focus on creation capability.
+        zakeke_id = validated_data.pop('zakeke_product_id', None)
+        
         # Standard update logic for the main product fields:
         instance.name = validated_data.get('name', instance.name)
+        instance.slug = validated_data.get('slug', instance.slug)
+        instance.sku = validated_data.get('sku', instance.sku)
         instance.subcategory = validated_data.get('subcategory', instance.subcategory)
+        instance.description = validated_data.get('description', instance.description)
         instance.base_price = validated_data.get('base_price', instance.base_price)
+        instance.stock_quantity = validated_data.get('stock_quantity', instance.stock_quantity)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        
         instance.discount_type = validated_data.get('discount_type', instance.discount_type)
         instance.discount_value = validated_data.get('discount_value', instance.discount_value)
         instance.is_on_sale = validated_data.get('is_on_sale', instance.is_on_sale)
         instance.primary_image = validated_data.get('primary_image', instance.primary_image)
         instance.save()
+        
+        if zakeke_id is not None:
+            if zakeke_id == "":
+                ZakekeProduct.objects.filter(product=instance).delete()
+            else:
+                ZakekeProduct.objects.update_or_create(
+                    product=instance,
+                    defaults={'zakeke_product_id': zakeke_id, 'is_active': True}
+                )
         return instance
+        
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if hasattr(instance, 'zakeke_mapping'):
+            ret['zakeke_product_id'] = instance.zakeke_mapping.zakeke_product_id
+        else:
+            ret['zakeke_product_id'] = None
+        return ret
 
 class BannerSerializer(serializers.ModelSerializer):
     buttons = serializers.SerializerMethodField()

@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.conf import settings
 from apps.catalog.models import Product
 
@@ -57,9 +57,14 @@ class SavedDesign(models.Model):
 
 class Template(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='templates')
+    # Link to specific print area (e.g. front or back)
+    
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    design_json = models.JSONField()
+    surface = models.CharField(max_length=50, default='front')
+    
+    # The full design state (for legacy or complex templates)
+    design_json = models.JSONField(null=True, blank=True)
     
     # categorization
     from apps.catalog.models import Subcategory
@@ -67,8 +72,43 @@ class Template(models.Model):
     tags = models.JSONField(default=list, blank=True)
     
     preview_image = models.ImageField(upload_to='templates/', null=True, blank=True)
+    locked = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+
+class TemplateElement(models.Model):
+    ELEMENT_TYPE_CHOICES = (
+        ('text', 'Text'),
+        ('image', 'Image'),
+    )
+    template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='elements')
+    type = models.CharField(max_length=20, choices=ELEMENT_TYPE_CHOICES, default='text')
+    
+    # For text elements
+    default_text = models.CharField(max_length=255, blank=True)
+    
+    # For image elements
+    default_image = models.ImageField(upload_to='template_assets/', null=True, blank=True)
+    
+    # Positioning (Percentage based)
+    x_percent = models.FloatField(default=50.0)
+    y_percent = models.FloatField(default=50.0)
+    max_width_percent = models.FloatField(default=80.0)
+    rotation = models.FloatField(default=0.0)
+    
+    # Metadata
+    font_family = models.CharField(max_length=100, blank=True)
+    font_size = models.IntegerField(null=True, blank=True)
+    color = models.CharField(max_length=20, blank=True) # hex
+    
+    locked = models.BooleanField(default=False)
+    display_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return f"{self.template.name} - {self.type} ({self.id})"
