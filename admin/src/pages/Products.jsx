@@ -29,7 +29,6 @@ const Products = () => {
         discount_type: '',
         discount_value: 0,
         is_on_sale: false,
-        is_on_sale: false,
         primary_image: null,
         zakeke_product_id: '',
     });

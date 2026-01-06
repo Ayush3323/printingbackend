@@ -195,7 +195,7 @@ const Customers = () => {
                             </div>
                             <div className="detail-row">
                                 <label>Status:</label>
-                                <span className={user.is_active ? 'text-success' : 'text-danger'}>
+                                <span className={selectedUser.is_active ? 'text-success' : 'text-danger'}>
                                     {selectedUser.is_active ? 'Active' : 'Inactive'}
                                 </span>
                             </div>
