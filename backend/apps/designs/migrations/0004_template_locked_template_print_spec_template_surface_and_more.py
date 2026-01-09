@@ -17,11 +17,12 @@ class Migration(migrations.Migration):
             name='locked',
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
-            model_name='template',
-            name='print_spec',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='templates', to='catalog.printspecs'),
-        ),
+        # Removed print_spec field to avoid dependency conflict with deleted PrintSpecs model
+        # migrations.AddField(
+        #     model_name='template',
+        #     name='print_spec',
+        #     field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='templates', to='catalog.printspecs'),
+        # ),
         migrations.AddField(
             model_name='template',
             name='surface',
