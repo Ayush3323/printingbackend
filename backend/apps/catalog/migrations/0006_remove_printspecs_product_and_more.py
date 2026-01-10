@@ -10,13 +10,31 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='printspecs',
-            name='product',
-        ),
-        migrations.RemoveField(
-            model_name='productattribute',
-            name='product',
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='printspecs',
+                    name='product',
+                ),
+                migrations.RemoveField(
+                    model_name='productattribute',
+                    name='product',
+                ),
+                migrations.DeleteModel(
+                    name='AttributeValue',
+                ),
+                migrations.DeleteModel(
+                    name='PrintSpecs',
+                ),
+                migrations.DeleteModel(
+                    name='ProductAttribute',
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL("DROP TABLE IF EXISTS catalog_printspecs CASCADE;"),
+                migrations.RunSQL("DROP TABLE IF EXISTS catalog_productattribute CASCADE;"),
+                migrations.RunSQL("DROP TABLE IF EXISTS catalog_attributevalue CASCADE;"),
+            ]
         ),
         migrations.RemoveField(
             model_name='product',
@@ -25,14 +43,5 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='product',
             name='weight_kg',
-        ),
-        migrations.DeleteModel(
-            name='AttributeValue',
-        ),
-        migrations.DeleteModel(
-            name='PrintSpecs',
-        ),
-        migrations.DeleteModel(
-            name='ProductAttribute',
         ),
     ]
