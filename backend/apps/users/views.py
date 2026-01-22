@@ -26,6 +26,21 @@ class UserViewSet(mixins.RetrieveModelMixin,
     def get_object(self):
         return self.request.user
 
+    @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
+    def me(self, request):
+        """
+        Get or update current user profile.
+        Endpoints: GET /api/v1/users/me/ | PATCH /api/v1/users/me/
+        """
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny], serializer_class=UserRegistrationSerializer)
     def register(self, request):
         serializer = self.get_serializer(data=request.data)
