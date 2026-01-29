@@ -29,18 +29,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
         try {
             // Call the register endpoint (public endpoint)
-            const response = await fetch('http://127.0.0.1:8000/api/v1/users/register/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(JSON.stringify(error));
-            }
+            const response = await adminUserAPI.register(formData);
 
             alert('User created successfully!');
             setFormData({
@@ -56,7 +45,8 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
             onClose();
         } catch (error) {
             console.error('Error creating user:', error);
-            alert('Failed to create user: ' + error.message);
+            const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+            alert('Failed to create user: ' + errorMessage);
         } finally {
             setLoading(false);
         }

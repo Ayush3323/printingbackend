@@ -23,6 +23,7 @@ api.interceptors.request.use((config) => {
 // Admin User Management APIs
 export const adminUserAPI = {
     getUsers: (params) => api.get('/admin/users/', { params }),
+    register: (data) => api.post('/users/register/', data),
     getUser: (id) => api.get(`/admin/users/${id}/`),
     updateUser: (id, data) => api.patch(`/admin/users/${id}/`, data),
     deleteUser: (id) => api.delete(`/admin/users/${id}/`),
