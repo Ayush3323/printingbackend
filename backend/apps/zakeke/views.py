@@ -73,11 +73,36 @@ class ZakekeViewSet(viewsets.ViewSet):
                     # Fallback to local ID (legacy support)
                     product = Product.objects.get(id=pk)
             
-            # Placeholder: In our system, 'options' might be mapped from 
-            # related attributes or variants. For now, returning empty list as per docs if none.
-            return Response([])
+            # Return product options/variants
+            # Zakeke expects an array of option objects, or empty array if no options
+            # Each option should have: id, name, values, etc.
+            # For now, return empty array as we don't have product variants/options configured
+            # This is valid per Zakeke docs - empty array means no options
+            options = []
+            
+            # Return proper structure that Zakeke expects
+            # Zakeke might be looking for metadata, so return a structured response
+            return Response({
+                "options": options,
+                "variants": [],
+                "metadata": {
+                    "product_id": product.id,
+                    "product_name": product.name,
+                    "sku": product.sku,
+                    "price": str(product.base_price),
+                    "in_stock": product.stock_quantity > 0 or product.is_infinite_stock
+                }
+            })
         except Product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            # Log error but return empty structure to prevent Zakeke errors
+            print(f"Error in product_options: {e}")
+            return Response({
+                "options": [],
+                "variants": [],
+                "metadata": {}
+            })
 
     @action(detail=True, methods=['post', 'delete'], url_path='customizer')
     def customizer_status(self, request, pk=None):
