@@ -11,8 +11,8 @@ class ZakekeClient:
     TOKEN_URL = "https://api.zakeke.com/token"
     
     # Hardcoded for now based on user input, should move to settings/env
-    CLIENT_ID = getattr(settings, 'ZAKEKE_CLIENT_ID', '325275')
-    SECRET_KEY = getattr(settings, 'ZAKEKE_SECRET_KEY', '_7H32K1tb_iM_9Bs9aBdG7tkYS1opQtQ_35SmdDTj_8.')
+    CLIENT_ID = getattr(settings, 'ZAKEKE_CLIENT_ID', '328125')
+    SECRET_KEY = getattr(settings, 'ZAKEKE_SECRET_KEY', 'LnptOniAulJlGh5glVDMY45ZYXRUUpA0DWk9lgWto7w.')
 
     _instance = None
     _token = None

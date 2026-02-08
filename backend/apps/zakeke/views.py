@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import BasicAuthentication
 from django.conf import settings
+import requests
 from .client import zakeke_client
 from .serializers import ZakekeCatalogProductSerializer
 from .models import ZakekeProduct
@@ -14,8 +15,8 @@ class ZakekeBasicAuthentication(BasicAuthentication):
     and Secret Key as password.
     """
     def authenticate_credentials(self, userid, password, request=None):
-        client_id = getattr(settings, 'ZAKEKE_CLIENT_ID', '325275')
-        secret_key = getattr(settings, 'ZAKEKE_SECRET_KEY', '_7H32K1tb_iM_9Bs9aBdG7tkYS1opQtQ_35SmdDTj_8.')
+        client_id = getattr(settings, 'ZAKEKE_CLIENT_ID', '328125')
+        secret_key = getattr(settings, 'ZAKEKE_SECRET_KEY', 'LnptOniAulJlGh5glVDMY45ZYXRUUpA0DWk9lgWto7w.')
         
         if userid == client_id and password == secret_key:
             # We return None for user because Zakeke doesn't map to a local user
@@ -56,9 +57,22 @@ class ZakekeViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['get'], url_path='options')
     def product_options(self, request, pk=None):
         """Retrieve options for a specific product."""
-        # pk here is the 'code' from Zakeke, which is our local ID.
+        # pk here is the 'code' from Zakeke, which could be:
+        # - Zakeke product ID (UUID) if product is linked
+        # - SKU if product is not yet linked
+        # - Local ID (legacy)
         try:
-            product = Product.objects.get(id=pk)
+            # First try to find by Zakeke product ID
+            zakeke_product = ZakekeProduct.objects.filter(zakeke_product_id=pk).first()
+            if zakeke_product:
+                product = zakeke_product.product
+            else:
+                # Try by SKU
+                product = Product.objects.filter(sku=pk).first()
+                if not product:
+                    # Fallback to local ID (legacy support)
+                    product = Product.objects.get(id=pk)
+            
             # Placeholder: In our system, 'options' might be mapped from 
             # related attributes or variants. For now, returning empty list as per docs if none.
             return Response([])

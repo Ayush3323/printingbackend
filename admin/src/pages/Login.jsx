@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 import './Login.css';
 
 const Login = () => {
@@ -18,29 +19,29 @@ const Login = () => {
 
         try {
             // First, try to authenticate with the backend
-            const response = await fetch('http://127.0.0.1:8000/api/v1/admin/users/', {
-                method: 'GET',
+            const credentials = btoa(`${username}:${password}`);
+            const response = await api.get('/admin/users/', {
                 headers: {
-                    'Authorization': `Basic ${btoa(`${username}:${password}`)}`,
+                    'Authorization': `Basic ${credentials}`,
                 },
             });
 
-            if (response.ok) {
-                // Valid credentials
-                const result = login(username, password);
-                if (result.success) {
-                    navigate('/');
-                } else {
-                    setError('Login failed');
-                }
-            } else if (response.status === 401) {
-                setError('Invalid username or password');
+            // Valid credentials
+            const result = login(username, password);
+            if (result.success) {
+                navigate('/');
             } else {
-                setError('Server error. Please try again.');
+                setError('Login failed');
             }
         } catch (err) {
             console.error('Login error:', err);
-            setError('Network error. Please check if the server is running.');
+            if (err.response?.status === 401) {
+                setError('Invalid username or password');
+            } else if (err.response?.status) {
+                setError('Server error. Please try again.');
+            } else {
+                setError('Network error. Please check if the server is running.');
+            }
         } finally {
             setLoading(false);
         }

@@ -58,13 +58,8 @@ INSTALLED_APPS = [
     'apps.zakeke',
 ]
 
-# WhiteNoise dev helper only in DEBUG
-if DEBUG:
-    INSTALLED_APPS.insert(0, 'whitenoise.runserver_nostatic')
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -136,7 +131,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -159,6 +154,7 @@ default_local_origins = [
     'http://localhost:5174',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174',
+    'https://printing-website-nagpkmqb0-ayushs-projects-5ce28cca.vercel.app/'
 ]
 
 # Combine and remove duplicates
