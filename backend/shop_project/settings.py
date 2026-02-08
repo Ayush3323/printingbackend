@@ -154,12 +154,11 @@ default_local_origins = [
     'http://localhost:5174',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174',
-    'https://printing-website-nagpkmqb0-ayushs-projects-5ce28cca.vercel.app/'
 ]
 
 # Combine and remove duplicates
 CORS_ALLOWED_ORIGINS = list(set(cors_origins_env + default_local_origins))
-# Filter out empty strings
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS if origin.strip()]
+# Filter out empty strings and remove trailing slashes
+CORS_ALLOWED_ORIGINS = [origin.strip().rstrip('/') for origin in CORS_ALLOWED_ORIGINS if origin.strip()]
 
 CORS_ALLOW_CREDENTIALS = True
