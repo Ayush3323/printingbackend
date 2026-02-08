@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { adminUserAPI } from '../services/api';
 import api from '../services/api';
 // import './Customers.css';
 
