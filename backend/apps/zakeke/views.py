@@ -54,15 +54,14 @@ class ZakekeViewSet(viewsets.ViewSet):
         serializer = ZakekeCatalogProductSerializer(products_page, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path='options')
+    @action(detail=True, methods=['get'], url_path='options', authentication_classes=[], permission_classes=[permissions.AllowAny])
     def product_options(self, request, pk=None):
         """Retrieve options for a specific product."""
-        # pk here is the 'code' from Zakeke, which could be:
-        # - Zakeke product ID (UUID) if product is linked
-        # - SKU if product is not yet linked
-        # - Local ID (legacy)
+        # DEBUG MODE: Auth disabled to rule out 401/403 causing Zakeke 500 error.
+        
         try:
-            # First try to find by Zakeke product ID
+            # We need the product ID to generate consistent dynamic IDs for options
+            # Try by Zakeke ID first
             zakeke_product = ZakekeProduct.objects.filter(zakeke_product_id=pk).first()
             if zakeke_product:
                 product = zakeke_product.product
@@ -70,39 +69,57 @@ class ZakekeViewSet(viewsets.ViewSet):
                 # Try by SKU
                 product = Product.objects.filter(sku=pk).first()
                 if not product:
-                    # Fallback to local ID (legacy support)
-                    product = Product.objects.get(id=pk)
+                    # Fallback to local ID lookup
+                    # Handle case where pk might be non-numeric (if it's a UUID/SKU passed here)
+                    if str(pk).isdigit():
+                        product = Product.objects.get(id=pk)
+                    else:
+                        # If we can't find the product, return 404
+                        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
             
-            # Return product options/variants
-            # According to Zakeke Product Catalog API docs, the options endpoint should return
-            # an array of option objects.
-            # ERROR FIX: "Cannot read properties of undefined (reading 'metadata')"
-            # This often happens if the options array is empty or structured incorrectly.
-            # We will return a DUMMY "Standard" option to ensure Zakeke has something to render.
+            # Dynamic ID generation to ensure uniqueness across products
+            # We use the product ID as a base.
+            # Base ID: product.id
+            # Option ID: product.id * 100 + 1
+            # Value ID: product.id * 100 + 2
+            
+            pid = product.id
+            option_id = pid * 100 + 1
+            value_id = pid * 100 + 2
+            
             return Response([
                 {
-                    "code": "default-option",
+                    "id": option_id,
+                    "code": "standard_config",
                     "name": "Standard Configuration",
+                    "option_type": "select",
+                    "is_required": True,
                     "values": [
                         {
+                            "id": value_id,
                             "code": "standard",
                             "name": "Standard",
                             "price": 0.0,
-                            "preselected": True
+                            "is_default": True,
+                            "enabled": True
                         }
                     ]
                 }
             ])
-        except Product.DoesNotExist:
+
+        except (Product.DoesNotExist, ValueError):
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            # Log error but return empty structure to prevent Zakeke errors
             print(f"Error in product_options: {e}")
-            return Response({
-                "options": [],
-                "variants": [],
-                "metadata": {}
-            })
+            # Fallback to pure dummy generic IDs if something crashes
+            return Response([
+                {
+                    "id": 12345,
+                    "code": "standard_config",
+                    "name": "Standard Configuration", 
+                    "values": [{"id": 67890, "code": "standard", "name": "Standard"}]
+                }
+            ])
 
     @action(detail=True, methods=['post', 'delete'], url_path='customizer')
     def customizer_status(self, request, pk=None):
