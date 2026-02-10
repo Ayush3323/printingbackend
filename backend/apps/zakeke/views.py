@@ -74,17 +74,25 @@ class ZakekeViewSet(viewsets.ViewSet):
                     product = Product.objects.get(id=pk)
             
             # Return product options/variants
-            # Return product options/variants
             # According to Zakeke Product Catalog API docs, the options endpoint should return
-            # an array of option objects, or empty array if no options
-            # However, Zakeke frontend seems to expect an object wrapper or specific metadata field
-            # based on recent error reports.
-            # Changing to return an object structure to match potential expectations and error handler structure.
-            return Response({
-                "options": [],
-                "variants": [],
-                "metadata": {}
-            })
+            # an array of option objects.
+            # ERROR FIX: "Cannot read properties of undefined (reading 'metadata')"
+            # This often happens if the options array is empty or structured incorrectly.
+            # We will return a DUMMY "Standard" option to ensure Zakeke has something to render.
+            return Response([
+                {
+                    "code": "default-option",
+                    "name": "Standard Configuration",
+                    "values": [
+                        {
+                            "code": "standard",
+                            "name": "Standard",
+                            "price": 0.0,
+                            "preselected": True
+                        }
+                    ]
+                }
+            ])
         except Product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
