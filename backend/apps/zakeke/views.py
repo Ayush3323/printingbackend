@@ -74,13 +74,17 @@ class ZakekeViewSet(viewsets.ViewSet):
                     product = Product.objects.get(id=pk)
             
             # Return product options/variants
+            # Return product options/variants
             # According to Zakeke Product Catalog API docs, the options endpoint should return
             # an array of option objects, or empty array if no options
-            # Each option should have: id, name, values, etc.
-            # For now, return empty array as we don't have product variants/options configured
-            # This is valid per Zakeke docs - empty array means no options
-            # Zakeke expects an ARRAY, not an object
-            return Response([])
+            # However, Zakeke frontend seems to expect an object wrapper or specific metadata field
+            # based on recent error reports.
+            # Changing to return an object structure to match potential expectations and error handler structure.
+            return Response({
+                "options": [],
+                "variants": [],
+                "metadata": {}
+            })
         except Product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
